@@ -1,0 +1,106 @@
+---
+- hosts: all
+  become: yes
+  
+  vars:
+    NODEJS_VERSION: "16"
+    ansible_distribution_release: "focal"
+  
+  tasks:
+
+  # Installation Tasks
+
+    - name: 1. GPG key for NodeJS LTS
+      apt_key:
+        url: "https://deb.nodesource.com/gpgkey/nodesource.gpg.key"
+        state: present
+
+    - name: 2. Repos for NodesJS LTS
+      apt_repository:
+        repo: "deb https://deb.nodesource.com/node_{{ NODEJS_VERSION }}.x {{ ansible_distribution_release }} main"
+        state: present
+        update_cache: yes
+
+    - name: 3. Update and upgrade apt packages
+      apt:
+       upgrade: yes
+       update_cache: yes
+       cache_valid_time: 86400
+
+    - name: 4. Install NodeJS LTS
+      apt:
+        name: nodejs
+        state: present
+
+    - name: 5. Install GIT
+      apt:
+        name: git
+        state: present
+        update_cache: yes
+    
+    - name: 6. Install PM2
+      npm:
+        name: pm2
+        global: yes
+   
+  # Setting the environment variable
+
+    - name: 7. Set environment variable
+      lineinfile:
+       path: "/etc/environment"
+       state: present
+       regexp: "^REACT_APP_API_URL="
+       line: "REACT_APP_API_URL=http://demo-app-yhernandez.westus3.cloudapp.azure.com:3001"
+
+  # Demo-WebApp provisioning tasks
+
+    # Clone code from GitHub
+
+    - name: 8. Clone demo-webapp
+      git:
+        repo: https://github.com/Yonaetworks/demo-webapp
+        dest: /home/demoapp/demo-webapp
+        clone: yes
+        update: yes
+        force: yes
+
+    # Dependency installation for Demo-APP
+  
+    - name: 9. Install dependencies Demo-WebApp
+      shell:
+        cmd: npm install
+        chdir: /home/demoapp/demo-webapp
+   
+    # Run Demo-WebApp
+    - name: 10. Run Demo-WebApp
+      pm2: 
+        name: demo-webapp
+        state: started
+        config: /home/demoapp/demo-webapp/src/ecosystem.config.js
+
+  # Demo-API provisioning tasks
+
+    # Clone code from GitHub
+    - name: 11. Clone a demo-api
+      git:
+        repo: https://github.com/Yonaetworks/demo-api
+        dest: /home/demoapp/demo-api
+        clone: yes
+        update: yes
+        force: yes
+
+    # Dependency installation for Demo-API
+
+    - name: 12. Install dependencies Demo-API
+      shell:
+        cmd: npm install
+        chdir: /home/demoapp/demo-api 
+
+
+    - name: 13. Run Demo-API
+      pm2: 
+        name: demo-api
+        state: started
+        config: /home/demoapp/demo-api/ecosystem.config.cjs
+
+...
