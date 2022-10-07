@@ -40,6 +40,7 @@ resource "azurerm_public_ip" "vm-demoapp-pip" {
   location            = azurerm_resource_group.rg-demoapp.location
   resource_group_name = azurerm_resource_group.rg-demoapp.name
   allocation_method   = "Dynamic"
+  domain_name_label   = "demo-app-yhernandez"
 
 }
 
