@@ -75,8 +75,7 @@ resource "azurerm_linux_virtual_machine" "vm-demoapp" {
   resource_group_name = azurerm_resource_group.rg-demoapp.name
   size                = "Standard_D2as_v4"
   admin_username      = "yhernandez"
-  admin_password      = "gproject2022@"
-  disable_password_authentication = false
+  disable_password_authentication = true
   network_interface_ids = [
     azurerm_network_interface.vm-demoapp-nic-01.id,
   ]
@@ -85,6 +84,11 @@ resource "azurerm_linux_virtual_machine" "vm-demoapp" {
   os_disk {
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
+  }
+
+  admin_ssh_key {
+    username   = "yhernandez"
+    public_key = file("~/.ssh/id_rsa.pub")
   }
 
   source_image_reference {
