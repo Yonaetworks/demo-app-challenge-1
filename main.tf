@@ -62,7 +62,7 @@ resource "azurerm_network_interface" "vm-demoapp-nic-01" {
 
 # 7. Wait the allocation of Public IP
 resource "time_sleep" "wait_90_seconds" {
-  depends_on = [azurerm_network_interface.vm-ansible-nic-01]
+  depends_on = [azurerm_network_interface.vm-demoapp-nic-01]
 
   create_duration = "90s"
 }
